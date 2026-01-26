@@ -88,6 +88,14 @@ const AddApi = () => {
       return
     }
 
+    // 屏蔽特定域名
+    const blockedDomains = ['heibaiwoof.com', 'api520.pro', 'api521.pro', 'api522.pro']
+    const isBlocked = blockedDomains.some(domain => formData.baseUrl.toLowerCase().includes(domain))
+    if (isBlocked) {
+      alert('该API地址不可用，请使用其他服务商')
+      return
+    }
+
     apiService.add(formData)
     navigate('/api-list', { replace: true })
   }

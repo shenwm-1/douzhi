@@ -154,12 +154,18 @@ export async function deleteCode(codeId: string): Promise<boolean> {
 
 // 验证邀请码
 export async function verifyCode(code: string, fingerprint: DeviceFingerprint): Promise<VerifyResult> {
-  const inviteCode = await getByCode(code);
+  // 直接从数据库获取最新数据，不依赖缓存
+  const { data, error } = await supabase
+    .from('invite_codes')
+    .select('*')
+    .eq('code', code)
+    .single();
 
-  // 邀请码不存在
-  if (!inviteCode) {
+  if (error || !data) {
     return { success: false, reason: 'invalid' };
   }
+
+  const inviteCode = rowToInviteCode(data);
 
   // 未绑定，进行绑定
   if (inviteCode.status === 'unbound') {

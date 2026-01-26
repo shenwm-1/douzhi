@@ -38,15 +38,18 @@ const InviteCodeCheck = ({ children }: InviteCodeCheckProps) => {
       const verifiedCode = localStorage.getItem('verified_invite_code')
 
       if (verifiedCode) {
-        // 每次都联网验证，确保解绑后立即失效
+        // 每次都从服务器验证，确保数据最新
         const result = await inviteCodeStore.verifyCode(verifiedCode, fp)
         if (result.success) {
           setIsVerified(true)
+          // 更新本地存储时间戳
+          localStorage.setItem('invite_code_time', new Date().toISOString())
         } else {
           // 验证失败，清除本地状态
           localStorage.removeItem('invite_code_verified')
           localStorage.removeItem('verified_invite_code')
           localStorage.removeItem('verified_device_hash')
+          localStorage.removeItem('invite_code_time')
         }
       }
 
@@ -76,6 +79,7 @@ const InviteCodeCheck = ({ children }: InviteCodeCheckProps) => {
     const result = await inviteCodeStore.verifyCode(trimmedCode, fingerprint)
 
     if (result.success) {
+      // 保存到 localStorage，确保持久化
       localStorage.setItem('invite_code_verified', 'true')
       localStorage.setItem('verified_invite_code', trimmedCode)
       localStorage.setItem('verified_device_hash', fingerprint.hash)

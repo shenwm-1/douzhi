@@ -32,13 +32,14 @@ function simpleHash(str: string): string {
 
 // 收集设备硬件信息（跨浏览器一致）
 function collectDeviceInfo(): DeviceInfo {
+  // 只使用最稳定的硬件特征
   return {
     // 屏幕分辨率（硬件相关，跨浏览器一致）
-    screenResolution: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+    screenResolution: `${screen.width}x${screen.height}`,
     // 时区（系统设置，跨浏览器一致）
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    // 平台（操作系统，跨浏览器一致）
-    platform: navigator.platform,
+    // 简化平台信息，只保留操作系统类型
+    platform: getPlatformType(),
     // CPU核心数（硬件相关，跨浏览器一致）
     hardwareConcurrency: navigator.hardwareConcurrency || 0,
     // 设备内存（硬件相关，跨浏览器一致）
@@ -46,6 +47,35 @@ function collectDeviceInfo(): DeviceInfo {
     // 触摸点数（硬件相关，跨浏览器一致）
     maxTouchPoints: navigator.maxTouchPoints || 0
   };
+}
+
+// 获取统一的平台类型（跨浏览器一致）
+function getPlatformType(): string {
+  const ua = navigator.userAgent.toLowerCase();
+  const platform = navigator.platform.toLowerCase();
+  
+  // Windows
+  if (platform.includes('win') || ua.includes('windows')) {
+    return 'Windows';
+  }
+  // macOS
+  if (platform.includes('mac') || ua.includes('macintosh') || ua.includes('mac os')) {
+    return 'macOS';
+  }
+  // Linux
+  if (platform.includes('linux') || ua.includes('linux')) {
+    return 'Linux';
+  }
+  // iOS
+  if (platform.includes('iphone') || platform.includes('ipad') || ua.includes('iphone') || ua.includes('ipad')) {
+    return 'iOS';
+  }
+  // Android
+  if (platform.includes('android') || ua.includes('android')) {
+    return 'Android';
+  }
+  
+  return 'Unknown';
 }
 
 // 生成设备指纹
