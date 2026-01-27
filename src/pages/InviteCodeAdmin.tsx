@@ -38,6 +38,8 @@ const InviteCodeAdmin = () => {
   })
   const [password, setPassword] = useState('')
   const [prefix, setPrefix] = useState('') // 邀请码前缀
+  const [searchQuery, setSearchQuery] = useState('') // 搜索关键词
+  const [statusFilter, setStatusFilter] = useState<'all' | 'bound' | 'unbound'>('all') // 状态筛选
   const [error, setError] = useState('')
   const [codes, setCodes] = useState<InviteCode[]>([])
   const [loading, setLoading] = useState(false)
@@ -165,6 +167,21 @@ const InviteCodeAdmin = () => {
   const boundCount = codes.filter(c => c.status === 'bound').length
   const unboundCount = codes.filter(c => c.status === 'unbound').length
 
+  // 过滤邀请码
+  const filteredCodes = codes.filter(code => {
+    // 搜索过滤
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      if (!code.code.toLowerCase().includes(query)) return false
+    }
+    
+    // 状态过滤
+    if (statusFilter === 'bound' && code.status !== 'bound') return false
+    if (statusFilter === 'unbound' && code.status !== 'unbound') return false
+    
+    return true
+  })
+
   return (
     <div className="h-screen bg-[#F5F5F7] overflow-y-scroll" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="max-w-2xl mx-auto p-4 pb-20">
@@ -185,18 +202,39 @@ const InviteCodeAdmin = () => {
         </div>
 
         <div className="flex gap-3 mb-4">
-          <div className="flex-1 bg-green-50 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-green-600">{boundCount}</div>
-            <div className="text-xs text-green-600">已绑定</div>
-          </div>
-          <div className="flex-1 bg-gray-50 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-gray-600">{unboundCount}</div>
-            <div className="text-xs text-gray-600">未绑定</div>
-          </div>
-          <div className="flex-1 bg-blue-50 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-blue-600">{codes.length}</div>
-            <div className="text-xs text-blue-600">总计</div>
-          </div>
+          <button
+            onClick={() => setStatusFilter('all')}
+            className={`flex-1 rounded-xl p-3 text-center transition-all ${
+              statusFilter === 'all' 
+                ? 'bg-blue-500 text-white shadow-lg' 
+                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+            }`}
+          >
+            <div className="text-2xl font-bold">{codes.length}</div>
+            <div className="text-xs">总计</div>
+          </button>
+          <button
+            onClick={() => setStatusFilter('bound')}
+            className={`flex-1 rounded-xl p-3 text-center transition-all ${
+              statusFilter === 'bound' 
+                ? 'bg-green-500 text-white shadow-lg' 
+                : 'bg-green-50 text-green-600 hover:bg-green-100'
+            }`}
+          >
+            <div className="text-2xl font-bold">{boundCount}</div>
+            <div className="text-xs">已绑定</div>
+          </button>
+          <button
+            onClick={() => setStatusFilter('unbound')}
+            className={`flex-1 rounded-xl p-3 text-center transition-all ${
+              statusFilter === 'unbound' 
+                ? 'bg-gray-500 text-white shadow-lg' 
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <div className="text-2xl font-bold">{unboundCount}</div>
+            <div className="text-xs">未绑定</div>
+          </button>
         </div>
 
         <div className="flex gap-2 mb-4">
@@ -224,13 +262,25 @@ const InviteCodeAdmin = () => {
           </button>
         </div>
 
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="搜索邀请码..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full bg-white px-4 py-3 rounded-xl outline-none text-sm"
+          />
+        </div>
+
         {loading ? (
           <div className="text-center py-8 text-gray-500">加载中...</div>
-        ) : codes.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">暂无邀请码</div>
+        ) : filteredCodes.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            {searchQuery ? '未找到匹配的邀请码' : '暂无邀请码'}
+          </div>
         ) : (
           <div className="space-y-3">
-            {codes.map(code => (
+            {filteredCodes.map(code => (
               <div key={code.id} className="bg-white rounded-xl p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono text-lg font-semibold">{code.code}</span>
