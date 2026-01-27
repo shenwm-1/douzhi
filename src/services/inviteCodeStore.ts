@@ -152,7 +152,7 @@ export async function deleteCode(codeId: string): Promise<boolean> {
   return true;
 }
 
-// 验证邀请码
+// 验证邀请码（兼容旧版指纹）
 export async function verifyCode(code: string, fingerprint: DeviceFingerprint): Promise<VerifyResult> {
   // 直接从数据库获取最新数据，不依赖缓存
   const { data, error } = await supabase
@@ -179,8 +179,18 @@ export async function verifyCode(code: string, fingerprint: DeviceFingerprint): 
     return { success: false, reason: 'invalid' };
   }
 
-  // 已绑定，检查是否是同一设备
+  // 已绑定，检查是否是同一设备（新版指纹）
   if (inviteCode.deviceFingerprint === fingerprint.hash) {
+    return { success: true, code: inviteCode };
+  }
+
+  // 兼容旧版指纹：尝试用旧版算法验证
+  const { generateFingerprintLegacy } = await import('../utils/deviceFingerprint');
+  const legacyFingerprint = generateFingerprintLegacy();
+  
+  if (inviteCode.deviceFingerprint === legacyFingerprint.hash) {
+    // 旧版指纹匹配，自动升级到新版指纹
+    await bindDevice(inviteCode.id, fingerprint);
     return { success: true, code: inviteCode };
   }
 

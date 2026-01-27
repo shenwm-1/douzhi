@@ -49,6 +49,18 @@ function collectDeviceInfo(): DeviceInfo {
   };
 }
 
+// 收集旧版设备硬件信息（兼容旧数据）
+function collectDeviceInfoLegacy(): DeviceInfo {
+  return {
+    screenResolution: `${screen.width}x${screen.height}x${screen.colorDepth}`,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    platform: navigator.platform,
+    hardwareConcurrency: navigator.hardwareConcurrency || 0,
+    deviceMemory: (navigator as any).deviceMemory || 0,
+    maxTouchPoints: navigator.maxTouchPoints || 0
+  };
+}
+
 // 获取统一的平台类型（跨浏览器一致）
 function getPlatformType(): string {
   const ua = navigator.userAgent.toLowerCase();
@@ -81,6 +93,19 @@ function getPlatformType(): string {
 // 生成设备指纹
 export function generateFingerprint(): DeviceFingerprint {
   const info = collectDeviceInfo();
+  const dataStr = JSON.stringify(info);
+  const hash = simpleHash(dataStr);
+  
+  return {
+    hash,
+    info,
+    createdAt: new Date().toISOString()
+  };
+}
+
+// 生成旧版设备指纹（用于兼容验证）
+export function generateFingerprintLegacy(): DeviceFingerprint {
+  const info = collectDeviceInfoLegacy();
   const dataStr = JSON.stringify(info);
   const hash = simpleHash(dataStr);
   
