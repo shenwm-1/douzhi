@@ -199,16 +199,10 @@ export const getLastSyncTime = (): string | null => {
 /**
  * 自动同步（如果已登录）
  */
+/**
+ * 自动同步已停用：避免在用户不知情时将 API 配置上传至原作者 Supabase。
+ * 用户仍可在云端账号页面主动选择手动备份。
+ */
 export const autoSync = async (): Promise<void> => {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return
-  
-  const banned = await checkBanned(user.id)
-  if (banned) {
-    console.warn('账号已被清理，无法同步')
-    return
-  }
-  
-  // 静默上传备份
-  await uploadBackup()
+  return
 }
