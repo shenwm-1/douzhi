@@ -44,5 +44,5 @@ root.render(
     <MusicPlayerProvider>
       <App />
     </MusicPlayerProvider>
-  </BrowserRouter>
+  <BrowserRouter basename="/douzhi">
 )
