@@ -422,10 +422,7 @@ function App() {
       if (document.hidden) {
         console.log('📱 [visibilitychange] 页面隐藏，触发备份')
         doBackup()
-        // 🔥 云同步备份（如果已登录）
-        import('./services/cloudSyncService').then(({ autoSync }) => {
-          autoSync()
-        })
+        // 隐私保护：页面切到后台时只备份到本地，不自动向原作者 Supabase 上传。
       }
     }
 
