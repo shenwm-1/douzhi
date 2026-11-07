@@ -3,10 +3,7 @@
  * 记录用户的使用时长和活跃程度
  */
 
-import { supabase } from '../lib/supabase'
-
 const ACTIVITY_KEY = 'user_activity_data'
-const REPORT_INTERVAL = 60 * 1000 // 每60秒上报一次
 const HEARTBEAT_INTERVAL = 10 * 1000 // 每10秒心跳一次
 
 interface ActivityData {
@@ -18,7 +15,6 @@ interface ActivityData {
 }
 
 let heartbeatTimer: number | null = null
-let reportTimer: number | null = null
 let isActive = true
 let lastHeartbeat = Date.now()
 
@@ -71,34 +67,10 @@ const saveLocalData = (data: ActivityData) => {
 /**
  * 上报活跃数据到服务器
  */
-const reportToServer = async () => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    
-    const localData = getLocalData()
-    
-    // 更新到 user_status 表
-    const { error } = await supabase
-      .from('user_status')
-      .update({
-        total_active_seconds: localData.totalSeconds,
-        today_active_seconds: localData.todaySeconds,
-        last_active_at: new Date().toISOString()
-      })
-      .eq('user_id', user.id)
-    
-    if (error) {
-      console.error('上报活跃数据失败:', error)
-    } else {
-      localData.lastReportTime = Date.now()
-      saveLocalData(localData)
-    }
-  } catch (e) {
-    console.error('上报活跃数据异常:', e)
-  }
+// 隐私保护：活跃时长仅保存在当前浏览器，不向原作者 Supabase 上报。
+const reportToServer = async (): Promise<void> => {
+  return
 }
-
 /**
  * 心跳：记录活跃时长
  */
@@ -126,8 +98,6 @@ const setupVisibilityListener = () => {
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       isActive = false
-      // 页面隐藏时立即上报
-      reportToServer()
     } else {
       isActive = true
       lastHeartbeat = Date.now()
@@ -160,9 +130,6 @@ export const startActivityTracker = () => {
   if (heartbeatTimer) clearInterval(heartbeatTimer)
   heartbeatTimer = window.setInterval(heartbeat, HEARTBEAT_INTERVAL)
   
-  // 启动定期上报
-  if (reportTimer) clearInterval(reportTimer)
-  reportTimer = window.setInterval(reportToServer, REPORT_INTERVAL)
   
   // 监听可见性变化
   setupVisibilityListener()
@@ -183,10 +150,6 @@ export const stopActivityTracker = () => {
   if (heartbeatTimer) {
     clearInterval(heartbeatTimer)
     heartbeatTimer = null
-  }
-  if (reportTimer) {
-    clearInterval(reportTimer)
-    reportTimer = null
   }
 }
 
