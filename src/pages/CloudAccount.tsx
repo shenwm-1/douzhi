@@ -99,6 +99,8 @@ const CloudAccount = () => {
 
   const handleSync = async () => {
     if (syncing) return
+    const confirmed = window.confirm('隐私提醒：这会把当前浏览器中的 API 配置（可能包含 API Key）上传到本项目原作者的 Supabase 云端数据库。若你尚未确认该云端账号归你所有，建议取消。确定继续备份吗？')
+    if (!confirmed) return
     setSyncing(true)
     try {
       const result = await uploadBackup()
