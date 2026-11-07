@@ -40,9 +40,9 @@ const root = ReactDOM.createRoot(document.getElementById('root')!)
 
 // 临时移除StrictMode排查消息保存问题
 root.render(
-  <BrowserRouter>
+  <BrowserRouter basename="/douzhi">
     <MusicPlayerProvider>
       <App />
     </MusicPlayerProvider>
-  <BrowserRouter basename="/douzhi">
+  </BrowserRouter>
 )
