@@ -145,7 +145,7 @@ const DataManager = () => {
         
         // 🔥 延迟刷新，让用户看到成功提示
         setTimeout(() => {
-          window.location.reload()
+          window.location.replace('/douzhi/')
         }, 1000)
         
       } catch (error: any) {
@@ -172,7 +172,7 @@ const DataManager = () => {
         try {
           await clearAllData()
           alert('✅ 所有数据已清除！页面即将刷新')
-          window.location.reload()
+          window.location.replace('/douzhi/')
         } catch (error) {
           console.error('清除数据失败:', error)
           alert('❌ 清除失败，请重试')
@@ -337,7 +337,7 @@ const DataManager = () => {
                   setProgress(null)
                   if (result.restoredCount > 0) {
                     alert(`✅ 恢复成功！\n\n恢复了 ${result.restoredCount} 个聊天\n共 ${result.totalMessages} 条消息\n\n页面将自动刷新...`)
-                    setTimeout(() => window.location.reload(), 1000)
+                    setTimeout(() => window.location.replace('/douzhi/'), 1000)
                   } else {
                     alert('ℹ️ 没有需要恢复的数据\n\nIndexedDB中的数据已是最新，或没有找到备份文件')
                   }
@@ -372,7 +372,7 @@ const DataManager = () => {
                   setProgress(null)
                   if (result.success) {
                     alert(`✅ 恢复成功！\n\n恢复了 ${result.restoredCount} 个联系人\n\n页面将自动刷新...`)
-                    setTimeout(() => window.location.reload(), 1000)
+                    setTimeout(() => window.location.replace('/douzhi/'), 1000)
                   } else {
                     alert('ℹ️ 没有需要恢复的联系人\n\nIndexedDB中的数据已是最新，或没有找到备份文件')
                   }
